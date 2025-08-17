@@ -1,0 +1,39 @@
+#cloud-config
+users:
+  - name: jakejohnson
+    groups: sudo
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    shell: /bin/bash
+    ssh_authorized_keys:
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAII2Syfoq/KviL0PBJgZeo/H99a5mpqSHPeaZWfPOV9gB
+
+ssh_pwauth: false
+chpasswd: {expire: false}
+
+package_update: true
+packages: 
+  - openssh-server
+  - etcd-server
+  - etcd-client
+
+write_files:
+  - path: /etc/default/etcd
+    owner: root:root
+    permissions: '0644'
+    content: |
+      ## etcd(1) daemon options
+      ## See "/usr/share/doc/etcd-server/op-guide/configuration.md.gz"
+      ## for available options.
+      ##
+      ## Use environment to override, for example: ETCD_NAME=default
+      ETCD_LISTEN_CLIENT_URLS="http://0.0.0.0:2379"
+      ETCD_LISTEN_PEER_URLS="http://0.0.0.0:2380"
+      ETCD_ADVERTISE_CLIENT_URLS="http://etcd.lan:2379"
+      ETCD_INITIAL_ADVERTISE_PEER_URLS="http://etcd.lan:2380"
+
+runcmd:
+  - [ systemctl, daemon-reload ]
+  - [ systemctl, enable, etcd ]
+  - [ systemctl, restart, etcd ]
+  - [ sleep, "2" ]
+  - [ curl, -fsSL, http://127.0.0.1:2379/health ]
