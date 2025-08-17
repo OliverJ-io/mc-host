@@ -1,0 +1,14 @@
+#cloud-config
+users:
+  - name: jakejohnson
+    groups: sudo
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    shell: /bin/bash
+    ssh_authorized_keys:
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAII2Syfoq/KviL0PBJgZeo/H99a5mpqSHPeaZWfPOV9gB
+
+ssh_pwauth: false
+
+package_update: true
+packages: [openssh-server]
+chpasswd: {expire: false}

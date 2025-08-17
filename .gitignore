@@ -1,0 +1,6 @@
+*.log
+*.pid
+*.iso
+*.img
+*.fd
+*.qcow2
