@@ -1,3 +1,5 @@
+.DS_Store
+.fseventsd/
 *.log
 *.pid
 *.iso
