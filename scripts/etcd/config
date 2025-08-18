@@ -1,0 +1,11 @@
+## etcd(1) daemon options
+## See "/usr/share/doc/etcd-server/op-guide/configuration.md.gz"
+## for available options.
+##
+## Use environment to override, for example: ETCD_NAME=default
+
+ETCD_LISTEN_CLIENT_URLS="http://0.0.0.0:2379"       # or "https://0.0.0.0:2379"
+ETCD_LISTEN_PEER_URLS="http://0.0.0.0:2380"
+
+ETCD_ADVERTISE_CLIENT_URLS="http://etcd.lan:2379"
+ETCD_INITIAL_ADVERTISE_PEER_URLS="http://etcd.lan:2380"

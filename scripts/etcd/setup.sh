@@ -1,2 +1,3 @@
 
-apt get install etcd-server
+sudo apt get install etcd-server
+

@@ -1,0 +1,51 @@
+#cloud-config
+users:
+  - name: jakejohnson
+    groups: sudo
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    shell: /bin/bash
+    ssh_authorized_keys:
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAII2Syfoq/KviL0PBJgZeo/H99a5mpqSHPeaZWfPOV9gB
+
+ssh_pwauth: false
+
+package_update: true
+chpasswd: {expire: false}
+
+packages: [openssh-server]
+
+write_files:
+  - path: /etc/default/rdns
+    permissions: '0644'
+    owner: root:root
+    content: |
+      APP__DNS__LISTEN_ADDR=0.0.0.0:8053
+      APP__GRPC__LISTEN_ADDR=0.0.0.0:50051
+  - path: /etc/systemd/system/rdns.service
+    permissions: '0644'
+    owner: root:root
+    content: |
+      [Unit]
+      Description=My Rust Daemon
+      After=network.target
+
+      [Service]
+      ExecStart=/usr/local/bin/rdns
+      Restart=always
+      RestartSec=5
+      User=root
+      EnvironmentFile=/etc/default/rdns
+      
+      [Install]
+      WantedBy=multi-user.target
+
+runcmd:
+  - curl -fsSL https://tailscale.com/install.sh | sh 
+  - sudo tailscale up --auth-key=tskey-auth-k8vA52mD4s11CNTRL-gEXkF1oZp7aYLY2jvqU77a3b612uoH5t --hostname=rdns --ssh
+  - [ sudo, mkdir, -p, /mnt/cidata ]
+  - [ sudo, mount, -o, ro, /dev/sr0, /mnt/cidata]
+  - [ cp, /mnt/cidata/rdns, /usr/local/bin ]
+  - [ sudo, umount, /mnt/cidata ]
+  - [ chmod, '0755', /usr/local/bin/rdns ]  
+  - [ systemctl, daemon-reload ]
+  - [ systemctl, enable, --now, rdns ]

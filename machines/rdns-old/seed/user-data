@@ -1,0 +1,50 @@
+#cloud-config
+users:
+  - name: jakejohnson
+    groups: sudo
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    shell: /bin/bash
+    ssh_authorized_keys:
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAII2Syfoq/KviL0PBJgZeo/H99a5mpqSHPeaZWfPOV9gB
+  - name: ubuntu
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    lock_passwd: false
+    shell: /bin/bash
+    passwd: "$6oj78MG2zz.I"
+
+ssh_pwauth: true
+
+package_update: true
+chpasswd: {expire: false}
+
+packages: [openssh-server,haveged]
+
+write_files:
+  - path: /etc/default/rdns
+    permissions: '0644'
+    owner: root:root
+    content: |
+      APP__DNS__LISTEN_ADDR=0.0.0.0:8053
+      APP__GRPC__LISTEN_ADDR=0.0.0.0:50051
+  - path: /etc/systemd/system/rdns.service
+    permissions: '0644'
+    owner: root:root
+    content: |
+      [Unit]
+      Description=My Rust Daemon
+      After=network.target
+
+      [Service]
+      ExecStart=/usr/local/bin/rdns
+      Restart=always
+      RestartSec=5
+      User=root
+
+      [Install]
+      WantedBy=multi-user.target
+
+runcmd:
+  - [ cp, /media/cidata/rdns, /usr/local/bin ]
+  - [ chmod, '0755', /usr/local/bin/rdns ]  
+  - [ systemctl, daemon-reload ]
+  - [ systemctl, enable, --now, rdns ]
